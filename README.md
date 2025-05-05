@@ -1,4 +1,4 @@
-# mubo
+# Mubo
 
 A new Flutter project.
 
