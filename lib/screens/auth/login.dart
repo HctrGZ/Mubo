@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'signup.dart';
-import 'db/database_helper.dart';
+import '../../db/database_helper.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});
