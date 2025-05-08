@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'signup.dart';
-import 'db/database_helper.dart';
-import 'home.dart';
+import '../../db/database_helper.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});
@@ -117,12 +116,6 @@ class Login extends StatelessWidget {
                     if (user != null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Inicio de sesión exitoso')),
-                      );
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => HomePage(username: username),
-                        ),
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
