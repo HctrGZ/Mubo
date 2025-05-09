@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mubo/screens/dashboardMain.dart';
+import 'package:mubo/screens/searchScreen.dart';
 import 'package:mubo/screens/splash.dart';
 
 void main() {
@@ -32,7 +34,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const Splash()
+      home: const DashboardMain()
     );
   }
 }
