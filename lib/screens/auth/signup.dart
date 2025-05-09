@@ -64,7 +64,7 @@ class SignUp extends StatelessWidget {
               child: Column(
                 children: [
                   TextField(
-                    controller: usernameController,
+                    controller: usernameController,  // Vinculando el controlador
                     decoration: InputDecoration(
                       hintText: 'Username',
                       filled: true,
@@ -78,6 +78,7 @@ class SignUp extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   TextField(
+                    controller: emailController,  // Vinculando el controlador
                     decoration: InputDecoration(
                       hintText: 'E-mail',
                       filled: true,
@@ -91,6 +92,7 @@ class SignUp extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   TextField(
+                    controller: passwordController,  // Vinculando el controlador
                     obscureText: true,
                     decoration: InputDecoration(
                       hintText: 'Password',
@@ -120,6 +122,11 @@ class SignUp extends StatelessWidget {
                     final email = emailController.text.trim();
                     final password = passwordController.text.trim();
 
+                    print("Username: $username");
+                    print("Email: $email");
+                    print("Password: $password");
+
+                    // Validación de los campos
                     if (username.isEmpty || email.isEmpty || password.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Por favor llena todos los campos')),
@@ -128,6 +135,15 @@ class SignUp extends StatelessWidget {
                     }
 
                     try {
+                      // Verificar si el usuario o el correo ya existen
+                      final existingUser = await DatabaseHelper.instance.getUserByUsernameOrEmail(username, email);
+                      if (existingUser != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('El usuario o correo ya están registrados')),
+                        );
+                        return;
+                      }
+
                       await DatabaseHelper.instance.insertUser({
                         'username': username,
                         'email': email,
@@ -142,7 +158,7 @@ class SignUp extends StatelessWidget {
                       );
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Error: usuario o correo ya existe')),
+                        const SnackBar(content: Text('Error al registrar el usuario')),
                       );
                     }
                   },

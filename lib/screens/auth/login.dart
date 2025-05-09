@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'signup.dart';
 import '../../db/database_helper.dart';
+import 'package:mubo/screens/dashboardMain.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});
@@ -77,6 +78,7 @@ class Login extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   TextField(
+                    controller: passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       hintText: 'Password',
@@ -101,29 +103,46 @@ class Login extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    final username = usernameController.text.trim();
-                    final password = passwordController.text.trim();
+                    onPressed: () async {
+                      final username = usernameController.text.trim();
+                      final password = passwordController.text.trim();
 
-                    if (username.isEmpty || password.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Completa los campos')),
-                      );
-                      return;
-                    }
+                      print("Username: '$username'");
+                      print("Password: '$password'");
 
-                    final user = await DatabaseHelper.instance.getUser(username, password);
-                    if (user != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Inicio de sesión exitoso')),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Credenciales incorrectas')),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
+                      // Validación de campos vacíos
+                      if (username.isEmpty || password.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Por favor llena todos los campos')),
+                        );
+                        return;
+                      }
+
+                      // Verificar si el usuario existe con el nombre o el correo
+                      final user = await DatabaseHelper.instance.getUserByUsernameOrEmail(username, username);
+
+                      if (user != null) {
+                        // Comparar las contraseñas (asegurándose de que la contraseña en la base de datos sea la correcta)
+                        if (user['password_hash'] == password) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Inicio de sesión exitoso')),
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const dashboardMain()), // Reemplaza con la pantalla que corresponde
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Credenciales incorrectas')),
+                          );
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Credenciales incorrectas')),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF6C45E6),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
