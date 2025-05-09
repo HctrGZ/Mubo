@@ -9,19 +9,34 @@ class DatabaseHelper {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('mubo.db');
-    return _database!;
-  }
 
-  Future<Database> _initDB(String fileName) async {
+    // Obtener la ruta de la base de datos
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, fileName);
-    return await openDatabase(
+    final path = join(dbPath, 'mubo.db');
+
+    // Abrir la base de datos
+    _database = await openDatabase(
       path,
       version: 1,
       onCreate: _createDB,
     );
+
+    // Eliminar las tablas si ya existen (esto "reseteará" las tablas)
+    final db = await _database!;
+    await db.execute('DROP TABLE IF EXISTS usuarios');
+    await db.execute('DROP TABLE IF EXISTS favoritos');
+    await db.execute('DROP TABLE IF EXISTS preferencias_usuario');
+    await db.execute('DROP TABLE IF EXISTS recomendaciones');
+    await db.execute('DROP TABLE IF EXISTS historial_busqueda');
+    await db.execute('DROP TABLE IF EXISTS noticias');
+
+    // Luego, recreamos las tablas de nuevo
+    await _createDB(db, 1);
+
+    return _database!;
   }
+
+
 
   Future<void> _createDB(Database db, int version) async {
     await db.execute('''
@@ -29,7 +44,7 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
         email TEXT NOT NULL UNIQUE,
-        password_hash TEXT NOT NULL,
+        password TEXT NOT NULL,
         foto_perfil TEXT,
         telefono TEXT,
         fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -96,15 +111,17 @@ class DatabaseHelper {
     return await db.insert('usuarios', user);
   }
 
-  Future<Map<String, dynamic>?> getUser(String username, String password) async {
+  // Verificar si el usuario o el correo ya existen
+  Future<Map<String, dynamic>?> getUserByUsernameOrEmail(String username, String email) async {
     final db = await instance.database;
     final result = await db.query(
       'usuarios',
-      where: 'username = ? AND password_hash = ?',
-      whereArgs: [username, password],
+      where: 'username = ? OR email = ?',
+      whereArgs: [username, email],
     );
     return result.isNotEmpty ? result.first : null;
   }
+
 
   // --- Favoritos ---
   Future<int> insertFavorito(Map<String, dynamic> favorito) async {
